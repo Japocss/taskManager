@@ -7,7 +7,7 @@ import Icon from 'react-native-vector-icons/FontAwesome'
 
 import todayImage from '../../assets/imgs/today.jpg'
 import Task from "../components/Task"
-import { useState } from "react"
+import { useEffect,  useState } from "react"
 
 const taskDB = [
     {
@@ -43,24 +43,52 @@ export default function TaskList() {
 
     const[tasks, setTasks] = useState([...taskDB])
 
+    const[visibleTasks, setVisibleTasks] = useState([...tasks])
+    const[showDoneTasks, setShowDoneTasks] = useState(true)
+
+    useEffect(() => {
+        filterTasks()
+
+    }, [showDoneTasks])
+
     const toggleTask = (taskId) => {
-        const taskList = [...tasks]
-        taskList.forEach(task => {
+        const taskList = [...visibleTasks]
+
+        for (let i = 0; i < taskList.length; i++) {
+            const task = taskList[i];
             if(task.id === taskId){
                 task.doneAt = task.doneAt ? null : new Date()
+                break
             }
-        })
+        }
 
-        setTasks([...taskList])
+        setVisibleTasks([...taskList])
+        filterTasks()
     }
 
-    return (
+    const toggleFilter = () => {
+        setShowDoneTasks(!showDoneTasks)
+    }
+
+    const filterTasks = () => {
+        let visibleTasks = null
+        if(showDoneTasks){
+            visibleTasks = [...tasks]
+        } else {
+            const pending = task => task.doneAt === null
+            visibleTasks = tasks.filter(pending)
+        }
+        setVisibleTasks(visibleTasks)
+    }
+
+    return(
         <View style={styles.container}>
             <ImageBackground source={todayImage} style={styles.background}>
 
                 <View style={styles.iconBar}>
-                    <TouchableOpacity onPress={() => console.log('oi')}>
-                        <Icon name="eye" size={20} color={'#fff'} />
+                    <TouchableOpacity onPress={toggleFilter}>
+                        <Icon name={showDoneTasks ? "eye" : "eye-slash"}
+                         size={20} color={'#fff'} />
                     </TouchableOpacity>
                 </View>
 
@@ -72,17 +100,17 @@ export default function TaskList() {
             </ImageBackground>
 
             <View style={styles.taskList}>
-                <FlatList
-                    data={tasks}
+                <FlatList 
+                    data={visibleTasks}
                     keyExtractor={item => `${item.id}`}
-                    renderItem={({ item }) => <Task {...item} onToggleTask={toggleTask}/>}
+                    renderItem={({item}) => <Task {...item} onToggleTask={toggleTask}/>}
                 />
             </View>
 
             <TouchableOpacity style={styles.addButton}
                 activeOpacity={0.7}
                 onPress={() => console.warn("+")}>
-
+                
                 <Icon name="plus" size={20} color={"#fff"} />
 
             </TouchableOpacity>
@@ -99,7 +127,7 @@ const styles = StyleSheet.create({
     },
     taskList: {
         flex: 7
-    },
+    }, 
     titleBar: {
         flex: 1,
         justifyContent: 'flex-end'

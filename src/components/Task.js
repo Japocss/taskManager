@@ -7,7 +7,7 @@ import 'moment/locale/pt-br'
 
 export default props => {
 
-    const doneOrNotStyle = props.doneAt ? {textDecorationLine:'line-through'} : {}
+    const doneOrNotStyle = props.doneAt ? {textDecorationLine: 'line-through'} : {}
 
     const date = props.doneAt ? props.doneAt : props.estimateAt
     const formattedDate = moment(date).tz('America/Sao_Paulo').locale('pt-br').format('ddd, D [de] MMMM')
@@ -28,13 +28,13 @@ export default props => {
 }
 
 function getCheckView(doneAt) {
-    if(doneAt != null){
+    if(doneAt != null) {
         return(
             <View style={styles.done}>
-                <Icon name='check' size={20} color='#fff' />
+                <Icon name='check' size={20} color='#fff'/>
             </View>
         )
-    }  else {
+    } else {
         return(
             <View style={styles.pending}></View>
         )
