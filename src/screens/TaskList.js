@@ -1,4 +1,11 @@
-import { View, Text, ImageBackground, StyleSheet, TouchableOpacity, FlatList } from "react-native"
+import { View,
+    Text,
+    ImageBackground,
+    StyleSheet,
+    TouchableOpacity,
+    FlatList,
+    Alert
+} from "react-native"
 
 import moment from 'moment-timezone'
 import 'moment/locale/pt-br'
@@ -51,7 +58,7 @@ export default function TaskList() {
     useEffect(() => {
         filterTasks()
 
-    }, [showDoneTasks])
+    }, [showDoneTasks, tasks])
 
     const toggleTask = (taskId) => {
         const taskList = [...visibleTasks]
@@ -80,6 +87,23 @@ export default function TaskList() {
             visibleTasks = tasks.filter(task => task.doneAt === null)
         }
         setVisibleTasks(visibleTasks)
+    }
+
+    const addTask = newTask => {
+        if(!newTask.desc || !newTask.desc.trim()){
+            Alert.alert('Dados inválidos', 'Descrição não informada!')
+            return
+        }
+
+        const tempTasks = [...tasks]
+        tempTasks.push({
+            id: Math.random(),
+            desc: newTask.date,
+            doneAt: null
+        })
+
+        setTasks(tempTasks)
+        setShowAddTask(false)
     }
 
     return(
