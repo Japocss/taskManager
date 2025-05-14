@@ -2,6 +2,8 @@ import { View, Text, StyleSheet, TouchableWithoutFeedback } from "react-native"
 
 import Icon from 'react-native-vector-icons/FontAwesome'
 
+import { /*-------*/ } from "react-native-gesture-handler"
+
 import moment from "moment-timezone"
 import 'moment/locale/pt-br'
 
@@ -11,6 +13,15 @@ export default props => {
 
     const date = props.doneAt ? props.doneAt : props.estimateAt
     const formattedDate = moment(date).tz('America/Sao_Paulo').locale('pt-br').format('ddd, D [de] MMMM')
+
+    const getRightContent = () => {
+        return{
+            <TouchableOpacity
+                onPress={() => props.onDelete && props.onDelete(props.id)}       >
+                <Icon name="trash" size={30} color="#fff"/>
+            </TouchableOpacity>
+        }
+    }
 
     return (
         <View style={styles.container}>
