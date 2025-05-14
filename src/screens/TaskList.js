@@ -1,4 +1,5 @@
-import { View,
+import {
+    View,
     Text,
     ImageBackground,
     StyleSheet,
@@ -49,11 +50,11 @@ export default function TaskList() {
     const today = moment().tz("America/Sao_Paulo")
         .locale("pt-br").format('ddd, D [de] MMMM')
 
-    const[tasks, setTasks] = useState([...taskDB])
+    const [tasks, setTasks] = useState([...taskDB])
 
-    const[visibleTasks, setVisibleTasks] = useState([...tasks])
-    const[showDoneTasks, setShowDoneTasks] = useState(true)
-    const[showAddTask, setShowAddTask] = useState(false)
+    const [visibleTasks, setVisibleTasks] = useState([...tasks])
+    const [showDoneTasks, setShowDoneTasks] = useState(true)
+    const [showAddTask, setShowAddTask] = useState(false)
 
     useEffect(() => {
         filterTasks()
@@ -65,7 +66,7 @@ export default function TaskList() {
 
         for (let i = 0; i < taskList.length; i++) {
             const task = taskList[i];
-            if(task.id === taskId){
+            if (task.id === taskId) {
                 task.doneAt = task.doneAt ? null : new Date()
                 break
             }
@@ -81,7 +82,7 @@ export default function TaskList() {
 
     const filterTasks = () => {
         let visibleTasks = null
-        if(showDoneTasks){
+        if (showDoneTasks) {
             visibleTasks = [...tasks]
         } else {
             visibleTasks = tasks.filter(task => task.doneAt === null)
@@ -90,7 +91,10 @@ export default function TaskList() {
     }
 
     const addTask = newTask => {
-        if(!newTask.desc || !newTask.desc.trim()){
+
+        console.warn(newTask)
+
+        if (!newTask.desc || !newTask.desc.trim()) {
             Alert.alert('Dados inválidos', 'Descrição não informada!')
             return
         }
@@ -98,7 +102,8 @@ export default function TaskList() {
         const tempTasks = [...tasks]
         tempTasks.push({
             id: Math.random(),
-            desc: newTask.date,
+            desc: newTask.desc,
+            estimateAt: newTask.date,
             doneAt: null
         })
 
@@ -106,19 +111,20 @@ export default function TaskList() {
         setShowAddTask(false)
     }
 
-    return(
+    return (
         <View style={styles.container}>
 
-            <AddTask isVisible={showAddTask} 
+            <AddTask isVisible={showAddTask}
                 onCancel={() => setShowAddTask(false)}
+                onSave={addTask}
             />
-            
+
             <ImageBackground size={30} source={todayImage} style={styles.background}>
 
                 <View style={styles.iconBar}>
                     <TouchableOpacity onPress={toggleFilter}>
-                        <Icon name={showDoneTasks ? "eye" : "eye-slash"} 
-                          size={20} color={'#fff'} />
+                        <Icon name={showDoneTasks ? "eye" : "eye-slash"}
+                            size={20} color={'#fff'} />
                     </TouchableOpacity>
                 </View>
 
@@ -130,17 +136,17 @@ export default function TaskList() {
             </ImageBackground>
 
             <View style={styles.taskList}>
-                <FlatList 
+                <FlatList
                     data={visibleTasks}
                     keyExtractor={item => `${item.id}`}
-                    renderItem={({item}) => <Task {...item} onToggleTask={toggleTask}/>}
+                    renderItem={({ item }) => <Task {...item} onToggleTask={toggleTask} />}
                 />
             </View>
 
             <TouchableOpacity style={styles.addButton}
                 activeOpacity={0.7}
                 onPress={() => setShowAddTask(true)}>
-                
+
                 <Icon name="plus" size={20} color={"#fff"} />
 
             </TouchableOpacity>
@@ -158,7 +164,7 @@ const styles = StyleSheet.create({
     },
     taskList: {
         flex: 7
-    }, 
+    },
     titleBar: {
         flex: 1,
         justifyContent: 'flex-end'
