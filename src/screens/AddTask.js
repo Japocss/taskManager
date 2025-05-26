@@ -68,12 +68,13 @@ export default function AddTask(props) {
                     <TouchableOpacity onPress={props.onCancel}>
                         <Text style={styles.button}>Cancelar</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => {
-                        props.onSave({ desc, date })
-                        setDesc("")
-                        setDate(new Date())
-                    }
-                    }>
+                    <TouchableOpacity 
+                        onPress={() => {
+                                props.onSave({ desc, date })
+                                setDesc("")
+                                setDate(new Date())
+                            }
+                        }>
                         <Text style={styles.button}>Salvar</Text>
                     </TouchableOpacity>
                 </View>

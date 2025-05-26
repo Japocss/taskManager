@@ -4,7 +4,7 @@ import { StyleSheet } from "react-native"
 
 export default function App() {
   return(
-    <GestureHandlerRootView style={StyleSheet.container}>
+    <GestureHandlerRootView style={styles.container}>
       <TaskList />
     </GestureHandlerRootView>
   )

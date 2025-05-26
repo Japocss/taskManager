@@ -92,8 +92,6 @@ export default function TaskList() {
 
     const addTask = newTask => {
 
-        console.warn(newTask)
-
         if (!newTask.desc || !newTask.desc.trim()) {
             Alert.alert('Dados inválidos', 'Descrição não informada!')
             return
@@ -109,6 +107,11 @@ export default function TaskList() {
 
         setTasks(tempTasks)
         setShowAddTask(false)
+    }
+
+    const deleteTask = id => {
+        const tempTasks = tasks.filter(task => task.id !== id)
+        setTasks(tempTasks)
     }
 
     return (
@@ -139,7 +142,10 @@ export default function TaskList() {
                 <FlatList
                     data={visibleTasks}
                     keyExtractor={item => `${item.id}`}
-                    renderItem={({ item }) => <Task {...item} onToggleTask={toggleTask} />}
+                    renderItem={({ item }) =>
+                        <Task {...item} 
+                            onToggleTask={toggleTask}
+                            onDelete={deleteTask} />}
                 />
             </View>
 
