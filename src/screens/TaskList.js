@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react"
-import {
-    View,
-    Text,
-    ImageBackground,
-    StyleSheet,
-    TouchableOpacity,
+import { 
+    View, 
+    Text, 
+    ImageBackground, 
+    StyleSheet, 
+    TouchableOpacity, 
     FlatList,
     Alert
 } from "react-native"
@@ -13,10 +13,11 @@ import moment from 'moment-timezone'
 import 'moment/locale/pt-br'
 import Icon from 'react-native-vector-icons/FontAwesome'
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import axios from "axios"
+
 
 import todayImage from '../../assets/imgs/today.jpg'
 import Task from "../components/Task"
-
 import AddTask from "./AddTask"
 
 const taskDB = [
@@ -58,7 +59,7 @@ export default function TaskList() {
     const [showAddTask, setShowAddTask] = useState(false)
 
     const [contador, setContador] = useState(0)
-    
+
     useEffect(() => {
         if(contador == 0){
             getTasks()
@@ -73,23 +74,37 @@ export default function TaskList() {
     }, [tasks])
 
     async function getTasks() {
-        const tasksString = await AsyncStorage.getItem('tasksState')
-        const tasks = tasksString && JSON.parse(tasksString) || taskDB
-        setTasks(tasks)
+        try {
+            const response = await axios.get('https://67f51ca7913986b16fa349ce.mockapi.io/meditime/api/v1/tasks')
+            setTasks(response.data)
+
+        } catch(erro) {
+            console.error('Erro ao carregar os dados', error)
+        }
     }
 
-    const toggleTask = (taskId) => {
+    const toggleTask = async (taskId) => {
         const taskList = [...visibleTasks]
 
+        let taskUpdate= null
         for (let i = 0; i < taskList.length; i++) {
             const task = taskList[i];
-            if (task.id === taskId) {
+            if(task.id === taskId){
                 task.doneAt = task.doneAt ? null : new Date()
+                taskUpdate = task
                 break
             }
         }
 
         setVisibleTasks([...taskList])
+
+        try {
+            const response = await 
+                axios.put(`https://67f51ca7913986b16fa349ce.mockapi.io/meditime/api/v1/tasks/${taskUpdate.id}`, taskUpdate)
+        } catch (error) {
+            console.error('Erro ao atualizar tarefa', error)
+        }
+
         filterTasks()
     }
 
@@ -99,7 +114,7 @@ export default function TaskList() {
 
     const filterTasks = () => {
         let visibleTasks = null
-        if (showDoneTasks) {
+        if(showDoneTasks){
             visibleTasks = [...tasks]
         } else {
             visibleTasks = tasks.filter(task => task.doneAt === null)
@@ -107,48 +122,70 @@ export default function TaskList() {
         setVisibleTasks(visibleTasks)
     }
 
-    const addTask = newTask => {
-
-        if (!newTask.desc || !newTask.desc.trim()) {
+    const addTask = async newTask => {
+      
+        if(!newTask.desc || !newTask.desc.trim()){
             Alert.alert('Dados inválidos', 'Descrição não informada!')
             return
         }
 
         const tempTasks = [...tasks]
-        tempTasks.push({
-            id: Math.random(),
+
+        const taskAdd = {
+            id: getLastTaskId(),
             desc: newTask.desc,
             estimateAt: newTask.date,
             doneAt: null
-        })
+        }
+
+        tempTasks.push(taskAdd)
 
         setTasks(tempTasks)
         setShowAddTask(false)
 
-        AsyncStorage.setItem('tasksState', JSON.stringify(tempTasks))
+        try {
+            const response = await axios.post('https://67f51ca7913986b16fa349ce.mockapi.io/meditime/api/v1/tasks', taskAdd)
+        } catch (error) {
+            console.error('Erro ao adicionar a tarefa', error)
+        }
+
+        // AsyncStorage.setItem('tasksState', JSON.stringify(tempTasks))
+        
+    }
+    
+    const deleteTask = async id => {
+        // const tempTasks = tasks.filter(task => task.id !== id)
+        // setTasks(tempTasks)
+        // AsyncStorage.setItem('tasksState', JSON.stringify(tempTasks))
+
+        try {
+            const response = await axios.delete(`https://67f51ca7913986b16fa349ce.mockapi.io/meditime/api/v1/tasks/${id}`)
+        } catch (error) {
+            console.error('Erro ao excluir tarefa', error)
+        }
+
+        getTasks()
+
     }
 
-    const deleteTask = id => {
-        const tempTasks = tasks.filter(task => task.id !== id)
-        setTasks(tempTasks)
-
-        AsyncStorage.setItem('tasksState', JSON.stringify(tempTasks))
+    function getLastTaskId(){
+        return Math.max(...tasks.map(task => task.id)) + 1
     }
-
-    return (
+    
+    return(
         <View style={styles.container}>
 
-            <AddTask isVisible={showAddTask}
+            <AddTask isVisible={showAddTask} 
                 onCancel={() => setShowAddTask(false)}
                 onSave={addTask}
             />
-
+            
             <ImageBackground size={30} source={todayImage} style={styles.background}>
 
                 <View style={styles.iconBar}>
                     <TouchableOpacity onPress={toggleFilter}>
-                        <Icon name={showDoneTasks ? "eye" : "eye-slash"}
-                            size={20} color={'#fff'} />
+                        <Icon name={showDoneTasks ? "eye" : "eye-slash"} 
+                          size={20} color={'#fff'} />
                     </TouchableOpacity>
                 </View>
 
@@ -160,20 +197,20 @@ export default function TaskList() {
             </ImageBackground>
 
             <View style={styles.taskList}>
-                <FlatList
+                <FlatList 
                     data={visibleTasks}
                     keyExtractor={item => `${item.id}`}
-                    renderItem={({ item }) =>
+                    renderItem={({item}) => 
                         <Task {...item} 
-                            onToggleTask={toggleTask}
-                            onDelete={deleteTask} />}
+                            onToggleTask={toggleTask} 
+                            onDelete={deleteTask}/>}
                 />
             </View>
 
             <TouchableOpacity style={styles.addButton}
                 activeOpacity={0.7}
                 onPress={() => setShowAddTask(true)}>
-
+                
                 <Icon name="plus" size={20} color={"#fff"} />
 
             </TouchableOpacity>
@@ -191,7 +228,7 @@ const styles = StyleSheet.create({
     },
     taskList: {
         flex: 7
-    },
+    }, 
     titleBar: {
         flex: 1,
         justifyContent: 'flex-end'
